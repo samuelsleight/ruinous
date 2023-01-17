@@ -12,6 +12,10 @@ pub struct Span<Data> {
 }
 
 impl Location {
+    pub fn new(line: usize, col: usize) -> Self {
+        Self { line, col }
+    }
+
     pub fn next_line(&mut self) {
         self.line += 1;
         self.col = 0;
