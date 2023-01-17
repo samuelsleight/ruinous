@@ -6,10 +6,10 @@ use self::{reader::CharReader, state::State};
 
 pub use self::error::Error;
 
+pub mod reader;
 pub mod state;
 
 mod error;
-mod reader;
 
 pub struct Lexer;
 
