@@ -49,7 +49,7 @@ impl<R: BufRead> CharReader<R> {
                 while let Continuation::Peek = callback(Span::new(start, location, char)) {}
             };
 
-            for char in buffer.trim_end().chars() {
+            for char in buffer.trim_end_matches(|c| c == '\n' || c == '\r').chars() {
                 handle_char(char);
             }
 
