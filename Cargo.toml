@@ -11,3 +11,6 @@ edition = "2021"
 
 [dependencies]
 ruinous-util = { path = "util" }
+
+[dev-dependencies]
+paste = "1.0.11"
