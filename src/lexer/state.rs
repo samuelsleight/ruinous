@@ -1,9 +1,6 @@
 use ruinous_util::{error::context::ErrorProvider, span::Span};
 
-pub enum Continuation {
-    Consume,
-    Peek,
-}
+pub use crate::reader::Continuation;
 
 pub trait State {
     type Token;

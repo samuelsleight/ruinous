@@ -3,7 +3,10 @@ use std::fmt::Debug;
 use ruinous_util::error::{context::ErrorProvider, writer::ErrorWriter};
 
 use super::state::State as ParserState;
-use crate::lexer::{state::State as LexerState, Error as LexError};
+use crate::{
+    lexer::{state::State as LexerState, Error as LexError},
+    reader::error::FileError,
+};
 
 pub enum Error<L: LexerState, P: ParserState<L::Token>> {
     LexError(LexError<L>),
@@ -17,6 +20,12 @@ pub struct ParseErrors<E: ErrorProvider> {
 impl<E: ErrorProvider> From<Vec<E>> for ParseErrors<E> {
     fn from(errors: Vec<E>) -> Self {
         Self { errors }
+    }
+}
+
+impl<L: LexerState, P: ParserState<L::Token>> From<FileError> for Error<L, P> {
+    fn from(error: FileError) -> Self {
+        Self::LexError(error.into())
     }
 }
 

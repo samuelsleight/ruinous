@@ -1,40 +1,17 @@
 use std::{
     fmt::Debug,
     io::{Read, Seek},
-    path::PathBuf,
 };
 
 use ruinous_util::error::{context::ErrorProvider, writer::ErrorWriter};
 
-use super::state::State;
+use crate::reader::error::FileError;
 
-#[derive(Debug)]
-pub enum FileError {
-    FileOpen {
-        file: PathBuf,
-        source: std::io::Error,
-    },
-    FileRead {
-        file: PathBuf,
-        source: std::io::Error,
-    },
-}
+use super::state::State;
 
 pub enum Error<S: State> {
     FileError(FileError),
     LexError(S::Error),
-}
-
-impl FileError {
-    #[must_use]
-    pub fn file_open(path: PathBuf, source: std::io::Error) -> Self {
-        FileError::FileOpen { file: path, source }
-    }
-
-    #[must_use]
-    pub fn file_read(path: PathBuf, source: std::io::Error) -> Self {
-        FileError::FileRead { file: path, source }
-    }
 }
 
 impl<S: State> From<FileError> for Error<S> {

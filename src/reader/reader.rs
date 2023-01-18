@@ -1,16 +1,21 @@
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, Cursor},
     path::{Path, PathBuf},
 };
 
 use ruinous_util::span::{Location, Span};
 
-use super::{error::FileError, state::Continuation};
+use super::error::FileError;
 
-pub struct CharReader<R: BufRead> {
+pub enum Continuation {
+    Consume,
+    Peek,
+}
+
+pub struct CharReader<R> {
     input: R,
-    path: PathBuf,
+    path: Option<PathBuf>,
 }
 
 impl CharReader<BufReader<File>> {
@@ -19,14 +24,21 @@ impl CharReader<BufReader<File>> {
         let file = File::open(path).map_err(|err| FileError::file_open(path.to_owned(), err))?;
         let reader = BufReader::new(file);
 
-        Ok(Self {
-            input: reader,
-            path: path.to_owned(),
-        })
+        Ok(Self::new(reader, Some(path.to_owned())))
+    }
+}
+
+impl<'a> CharReader<Cursor<&'a str>> {
+    pub fn from_str(input: &'a str) -> Self {
+        Self::new(Cursor::new(input), None)
     }
 }
 
 impl<R: BufRead> CharReader<R> {
+    pub fn new(input: R, path: Option<PathBuf>) -> Self {
+        Self { input, path }
+    }
+
     pub fn read<Callback: FnMut(Span<char>) -> Continuation>(
         mut self,
         mut callback: Callback,
@@ -39,7 +51,7 @@ impl<R: BufRead> CharReader<R> {
 
             match self.input.read_line(&mut buffer) {
                 Ok(0) => return Ok(()),
-                Err(err) => return Err(FileError::file_read(self.path, err)),
+                Err(err) => return Err(FileError::file_read(self.path.unwrap_or_default(), err)),
                 _ => (),
             }
 
@@ -90,11 +102,7 @@ mod test {
     }
 
     fn reader_test(input: &str, expected: &[Span<char>]) {
-        let reader = CharReader {
-            input: std::io::Cursor::new(input),
-            path: "".into(),
-        };
-
+        let reader = CharReader::from_str(input);
         let result = reader.collect().unwrap();
         assert_eq!(&result, expected);
     }
