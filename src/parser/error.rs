@@ -14,7 +14,7 @@ pub enum Error<L: LexerState, P: ParserState<L::Token>> {
 }
 
 pub struct ParseErrors<E: ErrorProvider> {
-    errors: Vec<E>,
+    pub errors: Vec<E>,
 }
 
 impl<E: ErrorProvider> From<Vec<E>> for ParseErrors<E> {
