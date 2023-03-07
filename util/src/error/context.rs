@@ -6,14 +6,14 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use super::writer::ErrorWriter;
+use super::writer::{ErrorWriter, PackagedErrorWriter};
 
 pub struct ErrorContext<R: Read + Seek> {
     pub(crate) source: BufReader<R>,
 }
 
 pub trait ErrorProvider: Debug {
-    fn write_errors<R: Read + Seek>(&self, writer: &mut ErrorWriter<R>) -> std::fmt::Result;
+    fn write_errors(&self, writer: &mut dyn ErrorWriter) -> std::fmt::Result;
 }
 
 pub struct PackagedError<R: Read + Seek, E: ErrorProvider> {
@@ -57,7 +57,7 @@ impl<R: Read + Seek, E: ErrorProvider> Display for PackagedError<R, E> {
             .context
             .lock()
             .map_err(|_| std::fmt::Error::default())?;
-        let mut writer = ErrorWriter::new(&mut context, f);
+        let mut writer = PackagedErrorWriter::new(&mut context, f);
         self.provider.write_errors(&mut writer)
     }
 }

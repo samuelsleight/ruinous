@@ -1,7 +1,4 @@
-use std::{
-    fmt::Debug,
-    io::{Read, Seek},
-};
+use std::fmt::Debug;
 
 use ruinous_util::error::{context::ErrorProvider, writer::ErrorWriter};
 
@@ -30,7 +27,7 @@ impl<S: State> Debug for Error<S> {
 }
 
 impl<S: State> ErrorProvider for Error<S> {
-    fn write_errors<R: Read + Seek>(&self, writer: &mut ErrorWriter<R>) -> std::fmt::Result {
+    fn write_errors(&self, writer: &mut dyn ErrorWriter) -> std::fmt::Result {
         match self {
             Error::FileError(error) => error.write_errors(writer),
             Error::LexError(error) => error.write_errors(writer),
@@ -39,7 +36,7 @@ impl<S: State> ErrorProvider for Error<S> {
 }
 
 impl ErrorProvider for FileError {
-    fn write_errors<R: Read + Seek>(&self, writer: &mut ErrorWriter<R>) -> std::fmt::Result {
+    fn write_errors(&self, writer: &mut dyn ErrorWriter) -> std::fmt::Result {
         match self {
             FileError::FileOpen { file, source } => writer.error(
                 None,

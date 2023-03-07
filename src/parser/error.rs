@@ -47,10 +47,7 @@ impl<E: ErrorProvider> Debug for ParseErrors<E> {
 }
 
 impl<L: LexerState, P: ParserState<L::Token>> ErrorProvider for Error<L, P> {
-    fn write_errors<R: std::io::Read + std::io::Seek>(
-        &self,
-        writer: &mut ErrorWriter<R>,
-    ) -> std::fmt::Result {
+    fn write_errors(&self, writer: &mut dyn ErrorWriter) -> std::fmt::Result {
         match self {
             Error::LexError(error) => error.write_errors(writer)?,
             Error::ParseErrors(errors) => {
