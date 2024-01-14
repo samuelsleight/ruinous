@@ -13,13 +13,18 @@ pub trait ErrorWriter {
 }
 
 pub struct PackagedErrorWriter<'ctx, 'fmt, 'a, R: Read + Seek> {
+    first: bool,
     context: &'ctx mut ErrorContext<R>,
     fmt: &'fmt mut Formatter<'a>,
 }
 
 impl<'ctx, 'fmt, 'a, R: Read + Seek> PackagedErrorWriter<'ctx, 'fmt, 'a, R> {
     pub(crate) fn new(context: &'ctx mut ErrorContext<R>, fmt: &'fmt mut Formatter<'a>) -> Self {
-        Self { context, fmt }
+        Self {
+            first: true,
+            context,
+            fmt,
+        }
     }
 
     fn write_span(&mut self, span: Span<()>) -> std::fmt::Result {
@@ -39,8 +44,6 @@ impl<'ctx, 'fmt, 'a, R: Read + Seek> PackagedErrorWriter<'ctx, 'fmt, 'a, R> {
             for _ in span.start.col..span.end.col {
                 self.fmt.write_char('^')?;
             }
-
-            writeln!(self.fmt, "\n")?;
         }
 
         Ok(())
@@ -58,10 +61,21 @@ impl<'ctx, 'fmt, 'a, R: Read + Seek> PackagedErrorWriter<'ctx, 'fmt, 'a, R> {
         )?;
         self.write_span(span)
     }
+
+    fn write_newlines(&mut self) -> std::fmt::Result {
+        if !self.first {
+            writeln!(self.fmt, "\n")?
+        }
+
+        self.first = false;
+        Ok(())
+    }
 }
 
 impl<'ctx, 'fmt, 'a, R: Read + Seek> ErrorWriter for PackagedErrorWriter<'ctx, 'fmt, 'a, R> {
     fn error(&mut self, span: Option<Span<()>>, message: &str) -> std::fmt::Result {
+        self.write_newlines()?;
+
         match span {
             Some(span) => self.spanned_error(span, message),
             None => self.unspanned_error(message),
@@ -69,6 +83,8 @@ impl<'ctx, 'fmt, 'a, R: Read + Seek> ErrorWriter for PackagedErrorWriter<'ctx, '
     }
 
     fn note(&mut self, span: Span<()>, message: &str) -> std::fmt::Result {
+        self.write_newlines()?;
+
         writeln!(
             self.fmt,
             "note: {}:{}: {}",
