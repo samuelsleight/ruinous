@@ -21,15 +21,15 @@ pub struct Lexer<R> {
 }
 
 impl Lexer<BufReader<File>> {
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, FileError> {
-        let reader = CharReader::from_file(path)?;
+    pub fn with_file<P: AsRef<Path>>(path: P) -> Result<Self, FileError> {
+        let reader = CharReader::with_file(path)?;
         Ok(Self { reader })
     }
 }
 
 impl<'a> Lexer<Cursor<&'a str>> {
-    pub fn from_str(input: &'a str) -> Self {
-        let reader = CharReader::from_str(input);
+    pub fn with_str(input: &'a str) -> Self {
+        let reader = CharReader::with_str(input);
         Self { reader }
     }
 }

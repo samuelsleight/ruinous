@@ -19,7 +19,7 @@ pub struct CharReader<R> {
 }
 
 impl CharReader<BufReader<File>> {
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, FileError> {
+    pub fn with_file<P: AsRef<Path>>(path: P) -> Result<Self, FileError> {
         let path = path.as_ref();
         let file = File::open(path).map_err(|err| FileError::file_open(path.to_owned(), err))?;
         let reader = BufReader::new(file);
@@ -29,7 +29,7 @@ impl CharReader<BufReader<File>> {
 }
 
 impl<'a> CharReader<Cursor<&'a str>> {
-    pub fn from_str(input: &'a str) -> Self {
+    pub fn with_str(input: &'a str) -> Self {
         Self::new(Cursor::new(input), None)
     }
 }
@@ -102,7 +102,7 @@ mod test {
     }
 
     fn reader_test(input: &str, expected: &[Span<char>]) {
-        let reader = CharReader::from_str(input);
+        let reader = CharReader::with_str(input);
         let result = reader.collect().unwrap();
         assert_eq!(&result, expected);
     }
