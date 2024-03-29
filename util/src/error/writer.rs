@@ -34,7 +34,7 @@ impl<'ctx, 'fmt, 'a, R: Read + Seek> PackagedErrorWriter<'ctx, 'fmt, 'a, R> {
                 "\n\t> {}\n\t> ",
                 self.context
                     .line(span.start.line)
-                    .map_err(|_| std::fmt::Error::default())?,
+                    .map_err(|_| std::fmt::Error)?,
             )?;
 
             for _ in 0..span.start.col {
