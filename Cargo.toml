@@ -9,6 +9,14 @@ authors = ["Samuel Sleight <samuel.sleight@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
 
+[workspace.lints.clippy]
+correctness = "deny"
+suspicious = "deny"
+perf = "deny"
+complexity = "warn"
+pedantic = "warn"
+style = "warn"
+
 [dependencies]
 ruinous-util = { path = "util" }
 

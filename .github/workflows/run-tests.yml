@@ -1,0 +1,27 @@
+name: Run Tests
+
+on: 
+  push: 
+    branches: [ "main" ]
+  pull_request: 
+    branches: [ "main" ]
+
+env: 
+  CARGO_TERM_COLOR: always
+
+jobs: 
+  build_and_test: 
+    strategy: 
+      matrix: 
+        os: [macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps: 
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Build and run the tests
+      - name: Run Tests
+        run: cargo test --verbose --workspace

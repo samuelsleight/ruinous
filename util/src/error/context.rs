@@ -53,10 +53,7 @@ impl<R: Read + Seek, E: ErrorProvider> std::error::Error for PackagedError<R, E>
 
 impl<R: Read + Seek, E: ErrorProvider> Display for PackagedError<R, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut context = self
-            .context
-            .lock()
-            .map_err(|_| std::fmt::Error::default())?;
+        let mut context = self.context.lock().map_err(|_| std::fmt::Error)?;
         let mut writer = PackagedErrorWriter::new(&mut context, f);
         self.provider.write_errors(&mut writer)
     }
